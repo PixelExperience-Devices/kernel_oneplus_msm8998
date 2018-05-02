@@ -57,6 +57,9 @@ struct thread_info {
 #ifndef CONFIG_THREAD_INFO_IN_TASK
 	int			cpu;		/* cpu */
 #endif
+#ifdef CONFIG_SHADOW_CALL_STACK
+	void			*shadow_call_stack;
+#endif
 };
 
 #ifdef CONFIG_THREAD_INFO_IN_TASK

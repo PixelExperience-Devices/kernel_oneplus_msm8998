@@ -37,6 +37,7 @@
 #include <asm/pgtable-hwdef.h>
 #include <asm/pgtable.h>
 #include <asm/page.h>
+#include <asm/scs.h>
 #include <asm/sysreg.h>
 #include <asm/thread_info.h>
 #include <asm/virt.h>
@@ -424,6 +425,10 @@ __primary_switched:
 	msr	vbar_el1, x8			// vector table address
 	isb
 
+#ifdef CONFIG_SHADOW_CALL_STACK
+	adr_l	x18, init_shadow_call_stack	// Set shadow call stack
+#endif
+
 	// Clear BSS
 	adr_l	x0, __bss_start
 	mov	x1, xzr
@@ -670,11 +675,19 @@ __secondary_switched:
 	mov	sp, x1
 	ldr	x2, [x0, #CPU_BOOT_TASK]
 	msr	sp_el0, x2
+#ifdef CONFIG_SHADOW_CALL_STACK
+	ldr	x18, [x2, #TSK_TI_SCS]		// Set shadow call stack
+	str	xzr, [x2, #TSK_TI_SCS]
+#endif
 #else
 	ldr_l	x0, secondary_data		// get secondary_data.stack
 	mov	sp, x0
 	and	x0, x0, #~(THREAD_SIZE - 1)
 	msr	sp_el0, x0			// save thread_info
+#ifdef CONFIG_SHADOW_CALL_STACK
+	ldr	x18, [x0, #TSK_TI_SCS]		// Set shadow call stack
+	str	xzr, [x0, #TSK_TI_SCS]
+#endif
 #endif
 	mov	x29, #0
 	b	secondary_start_kernel
