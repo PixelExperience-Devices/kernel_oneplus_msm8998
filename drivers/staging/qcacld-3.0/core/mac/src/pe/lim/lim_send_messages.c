@@ -591,7 +591,7 @@ tSirRetStatus lim_send_mode_update(tpAniSirGlobal pMac,
 			pVhtOpMode->opMode, pVhtOpMode->staId);
 #ifdef LIM_TRACE_RECORD
 	if (NULL == psessionEntry)
-		MTRACE(mac_trace_msg_tx(pMac, NO_SESSION, msgQ.type));
+		MTRACE(mac_trace_msg_tx(pMac, NO_SESSION, msgQ.type);)
 	else
 		MTRACE(mac_trace_msg_tx(pMac,
 					psessionEntry->peSessionId,
@@ -628,7 +628,7 @@ tSirRetStatus lim_send_rx_nss_update(tpAniSirGlobal pMac,
 	pe_debug("Sending WMA_UPDATE_RX_NSS");
 #ifdef LIM_TRACE_RECORD
 	if (NULL == psessionEntry)
-		MTRACE(mac_trace_msg_tx(pMac, NO_SESSION, msgQ.type));
+		MTRACE(mac_trace_msg_tx(pMac, NO_SESSION, msgQ.type);)
 	else
 		MTRACE(mac_trace_msg_tx(pMac,
 					psessionEntry->peSessionId,
@@ -667,7 +667,7 @@ tSirRetStatus lim_set_membership(tpAniSirGlobal pMac,
 	pe_debug("Sending WMA_UPDATE_MEMBERSHIP");
 #ifdef LIM_TRACE_RECORD
 	if (NULL == psessionEntry)
-		MTRACE(mac_trace_msg_tx(pMac, NO_SESSION, msgQ.type));
+		MTRACE(mac_trace_msg_tx(pMac, NO_SESSION, msgQ.type);)
 	else
 		MTRACE(mac_trace_msg_tx(pMac,
 					psessionEntry->peSessionId,
@@ -705,7 +705,7 @@ tSirRetStatus lim_set_user_pos(tpAniSirGlobal pMac,
 	pe_debug("Sending WMA_UPDATE_USERPOS");
 #ifdef LIM_TRACE_RECORD
 	if (NULL == psessionEntry)
-		MTRACE(mac_trace_msg_tx(pMac, NO_SESSION, msgQ.type));
+		MTRACE(mac_trace_msg_tx(pMac, NO_SESSION, msgQ.type);)
 	else
 		MTRACE(mac_trace_msg_tx(pMac,
 					psessionEntry->peSessionId,
