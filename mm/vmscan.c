@@ -3477,7 +3477,6 @@ static void kswapd_try_to_sleep(pg_data_t *pgdat, int order,
 	/* Try to sleep for a short interval */
 	if (prepare_kswapd_sleep(pgdat, order, remaining,
 						balanced_classzone_idx)) {
-			simple_lmk_stop_reclaim();
 		/*
 		 * Compaction records what page blocks it recently failed to
 		 * isolate pages from and skips them in the future scanning.
