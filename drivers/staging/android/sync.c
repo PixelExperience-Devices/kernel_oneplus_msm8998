@@ -165,7 +165,9 @@ static struct sync_fence *sync_fence_alloc(int size, const char *name)
 		goto err;
 
 	kref_init(&fence->kref);
+#ifdef CONFIG_SYNC_DEBUG
 	strlcpy(fence->name, name, sizeof(fence->name));
+#endif
 
 	init_waitqueue_head(&fence->wq);
 
@@ -451,6 +453,8 @@ static bool android_fence_signaled(struct fence *fence)
 	int ret;
 
 	ret = parent->ops->has_signaled(pt);
+	if (!ret && parent->destroyed)
+		ret = -ENOENT;
 	if (ret < 0)
 		fence->status = ret;
 	return ret;
