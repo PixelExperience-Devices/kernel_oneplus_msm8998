@@ -2430,22 +2430,23 @@ struct cfg80211_external_auth_params {
  * struct cfg80211_update_owe_info - OWE Information
  *
  * This structure provides information needed for the drivers to offload OWE
- * (Oppurtunistic Wireless Encryption) processing to the user space.
+ * (Opportunistic Wireless Encryption) processing to the user space.
  *
- * Commonly used across update_owe request and event interfaces.
+ * Commonly used across update_owe_info request and event interfaces.
  *
- * @bssid: BSSID of the peer from which the OWE processing has to be done.
+ * @peer: MAC address of the peer device for which the OWE processing
+ *	has to be done.
  * @status: status code, %WLAN_STATUS_SUCCESS for successful OWE info
- *	    processing, use %WLAN_STATUS_UNSPECIFIED_FAILURE if user space
- *	    cannot give you the real status code for failures. Used only for
- *	    OWE update response command interface (user space to driver).
- * @ie: IE's obtained from the peer or constructed by the user space. These are
- *	    the IE's of the remote peer in the event from the host driver and
- *	    the constructed IE's by the user space in the request interface.
- * @ie_len: Length of IE's in octets.
+ *	processing, use %WLAN_STATUS_UNSPECIFIED_FAILURE if user space
+ *	cannot give you the real status code for failures. Used only for
+ *	OWE update request command interface (user space to driver).
+ * @ie: IEs obtained from the peer or constructed by the user space. These are
+ *	the IEs of the remote peer in the event from the host driver and
+ *	the constructed IEs by the user space in the request interface.
+ * @ie_len: Length of IEs in octets.
  */
 struct cfg80211_update_owe_info {
-	u8 bssid[ETH_ALEN] __aligned(2);
+	u8 peer[ETH_ALEN] __aligned(2);
 	u16 status;
 	const u8 *ie;
 	size_t ie_len;
@@ -2751,8 +2752,8 @@ struct cfg80211_update_owe_info {
  *     user space
  *
  * @update_owe_info: Provide updated OWE info to driver. Driver implementing SME
- *	but offloading the OWE processing to the user space will get the updated
- *	DH IE's (from the IE's) obtained through this interface.
+ *	but offloading OWE processing to the user space will get the updated
+ *	DH IE through this interface.
  */
 struct cfg80211_ops {
 	int	(*suspend)(struct wiphy *wiphy, struct cfg80211_wowlan *wow);
@@ -4178,6 +4179,17 @@ const u8 *cfg80211_find_ie(u8 eid, const u8 *ies, int len);
  */
 const u8 *cfg80211_find_vendor_ie(unsigned int oui, u8 oui_type,
 				  const u8 *ies, int len);
+
+/**
+ * cfg80211_send_layer2_update - send layer 2 update frame
+ *
+ * @dev: network device
+ * @addr: STA MAC address
+ *
+ * Wireless drivers can use this function to update forwarding tables in bridge
+ * devices upon STA association.
+ */
+void cfg80211_send_layer2_update(struct net_device *dev, const u8 *addr);
 
 /**
  * DOC: Regulatory enforcement infrastructure
@@ -5910,13 +5922,6 @@ int cfg80211_external_auth_request(struct net_device *netdev,
 #define wiphy_WARN(wiphy, format, args...)			\
 	WARN(1, "wiphy: %s\n" format, wiphy_name(wiphy), ##args);
 
-/* Due to our tree having a backport of
- * 57fbcce37be7c1d2622b56587c10ade00e96afa3, this allows QC to support 4.7+
- * kernels that use the newer NL80211_BAND_* and older kernels that use the
- * older IEEE80211_BAND_* enums.
- */
-#define CFG80211_REMOVE_IEEE80211_BACKPORT 1
-
 /**
  * cfg80211_update_owe_info_event - Notify the peer's OWE info to user space
  * @netdev: network device
@@ -5926,5 +5931,12 @@ int cfg80211_external_auth_request(struct net_device *netdev,
 void cfg80211_update_owe_info_event(struct net_device *netdev,
 				    struct cfg80211_update_owe_info *owe_info,
 				    gfp_t gfp);
+
+/* Due to our tree having a backport of
+ * 57fbcce37be7c1d2622b56587c10ade00e96afa3, this allows QC to support 4.7+
+ * kernels that use the newer NL80211_BAND_* and older kernels that use the
+ * older IEEE80211_BAND_* enums.
+ */
+#define CFG80211_REMOVE_IEEE80211_BACKPORT 1
 
 #endif /* __NET_CFG80211_H */
