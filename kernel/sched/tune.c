@@ -142,6 +142,26 @@ struct schedtune {
 	/* Hint to bias scheduling of tasks on that SchedTune CGroup
 	 * towards idle CPUs */
 	int prefer_idle;
+#ifdef CONFIG_SCHED_WALT
+	/* Toggle ability to override sched boost enabled */
+	bool sched_boost_no_override;
+
+	/*
+	 * Controls whether a cgroup is eligible for sched boost or not. This
+	 * can temporariliy be disabled by the kernel based on the no_override
+	 * flag above.
+	 */
+	bool sched_boost_enabled;
+
+	/*
+	 * Controls whether tasks of this cgroup should be colocated with each
+	 * other and tasks of other cgroups that have the same flag turned on.
+	 */
+	bool colocate;
+
+	/* Controls whether further updates are allowed to the colocate flag */
+	bool colocate_update_disabled;
+#endif /* CONFIG_SCHED_WALT */
 
 #ifdef CONFIG_DYNAMIC_STUNE_BOOST
 	/*
@@ -285,6 +305,75 @@ struct boost_groups {
 
 /* Boost groups affecting each CPU in the system */
 DEFINE_PER_CPU(struct boost_groups, cpu_boost_groups);
+
+#ifdef CONFIG_SCHED_WALT
+static inline void init_sched_boost(struct schedtune *st)
+{
+	st->sched_boost_no_override = false;
+	st->sched_boost_enabled = true;
+	st->colocate = false;
+	st->colocate_update_disabled = false;
+}
+
+bool same_schedtune(struct task_struct *tsk1, struct task_struct *tsk2)
+{
+	return task_schedtune(tsk1) == task_schedtune(tsk2);
+}
+
+void update_cgroup_boost_settings(void)
+{
+	int i;
+
+	for (i = 0; i < BOOSTGROUPS_COUNT; i++) {
+		if (!allocated_group[i])
+			break;
+
+		if (allocated_group[i]->sched_boost_no_override)
+			continue;
+
+		allocated_group[i]->sched_boost_enabled = false;
+	}
+}
+
+void restore_cgroup_boost_settings(void)
+{
+	int i;
+
+	for (i = 0; i < BOOSTGROUPS_COUNT; i++) {
+		if (!allocated_group[i])
+			break;
+
+		allocated_group[i]->sched_boost_enabled = true;
+	}
+}
+
+bool task_sched_boost(struct task_struct *p)
+{
+	struct schedtune *st = task_schedtune(p);
+
+	return st->sched_boost_enabled;
+}
+
+static u64
+sched_boost_override_read(struct cgroup_subsys_state *css,
+			struct cftype *cft)
+{
+	struct schedtune *st = css_st(css);
+
+	return st->sched_boost_no_override;
+}
+
+static int sched_boost_override_write(struct cgroup_subsys_state *css,
+			struct cftype *cft, u64 override)
+{
+	struct schedtune *st = css_st(css);
+
+	st->sched_boost_no_override = !!override;
+
+	return 0;
+}
+
+#endif /* CONFIG_SCHED_WALT */
 
 static void
 schedtune_cpu_update(int cpu)
@@ -488,6 +577,34 @@ int schedtune_can_attach(struct cgroup_taskset *tset)
 
 	return 0;
 }
+
+#ifdef CONFIG_SCHED_WALT
+static u64 sched_colocate_read(struct cgroup_subsys_state *css,
+			struct cftype *cft)
+{
+	struct schedtune *st = css_st(css);
+
+	return st->colocate;
+}
+
+static int sched_colocate_write(struct cgroup_subsys_state *css,
+			struct cftype *cft, u64 colocate)
+{
+	struct schedtune *st = css_st(css);
+
+	if (st->colocate_update_disabled)
+		return -EPERM;
+
+	st->colocate = !!colocate;
+	st->colocate_update_disabled = true;
+	return 0;
+}
+
+#else /* CONFIG_SCHED_WALT */
+
+static inline void init_sched_boost(struct schedtune *st) { }
+
+#endif /* CONFIG_SCHED_WALT */
 
 void schedtune_cancel_attach(struct cgroup_taskset *tset)
 {
