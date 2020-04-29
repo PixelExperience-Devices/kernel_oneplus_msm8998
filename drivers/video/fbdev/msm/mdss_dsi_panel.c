@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2018, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2018, 2020, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -274,7 +274,7 @@
 	 }else
 		 cmdreq.cmds = &backlight_cmd;
 	 cmdreq.cmds_cnt = 1;
-	 cmdreq.flags = CMD_REQ_COMMIT | CMD_CLK_CTRL;
+	 cmdreq.flags = CMD_REQ_COMMIT | CMD_CLK_CTRL | CMD_REQ_DCS;
 	 cmdreq.rlen = 0;
 	 cmdreq.cb = NULL;
 	 mdss_dsi_cmdlist_put(ctrl, &cmdreq);
@@ -815,7 +815,7 @@
  
 	 memset(&cmdreq, 0, sizeof(cmdreq));
 	 cmdreq.cmds_cnt = 2;
-	 cmdreq.flags = CMD_REQ_COMMIT | CMD_CLK_CTRL;
+	 cmdreq.flags = CMD_REQ_COMMIT | CMD_CLK_CTRL | CMD_REQ_DCS;
 	 if (unicast)
 		 cmdreq.flags |= CMD_REQ_UNICAST;
 	 cmdreq.rlen = 0;
