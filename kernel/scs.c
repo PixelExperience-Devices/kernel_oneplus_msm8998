@@ -83,36 +83,31 @@ int scs_prepare(struct task_struct *tsk, int node)
 }
 
 #ifdef CONFIG_DEBUG_STACK_USAGE
-static inline unsigned long scs_used(struct task_struct *tsk)
-{
-	unsigned long *p = __scs_base(tsk);
-	unsigned long *end = scs_magic(tsk);
-	uintptr_t s = (uintptr_t)p;
-
-	while (p < end && *p)
-		p++;
-
-	return (uintptr_t)p - s;
-}
-
 static void scs_check_usage(struct task_struct *tsk)
 {
-	static DEFINE_SPINLOCK(lock);
 	static unsigned long highest;
-	unsigned long used = scs_used(tsk);
 
-	if (used <= highest)
-		return;
+	unsigned long *p = __scs_base(tsk);
+	unsigned long *end = scs_magic(tsk);
+	unsigned long prev, curr = highest, used = 0;
 
-	spin_lock(&lock);
-
-	if (used > highest) {
-		pr_info("%s: highest shadow stack usage %lu bytes\n",
-			__func__, used);
-		highest = used;
+	for (; p < end; ++p) {
+		if (!READ_ONCE_NOCHECK(*p))
+			break;
+		used += sizeof(*p);
 	}
 
-	spin_unlock(&lock);
+	while (used > curr) {
+		prev = cmpxchg_relaxed(&highest, curr, used);
+
+		if (prev == curr) {
+			pr_info("%s: highest shadow stack usage %lu bytes\n",
+				__func__, used);
+			break;
+		}
+
+		curr = prev;
+	}
 }
 #else
 static inline void scs_check_usage(struct task_struct *tsk)
