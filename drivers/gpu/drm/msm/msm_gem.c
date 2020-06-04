@@ -294,7 +294,6 @@ static void put_pages(struct drm_gem_object *obj)
 			msm_obj->flags &= ~MSM_BO_LOCKED;
 		}
 
-		if (msm_obj->sgt)
 			sg_free_table(msm_obj->sgt);
 		kfree(msm_obj->sgt);
 
