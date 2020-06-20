@@ -1471,7 +1471,6 @@ static struct platform_driver fd_driver = {
 		.name = MSM_FD_DRV_NAME,
 		.owner = THIS_MODULE,
 		.of_match_table = msm_fd_dt_match,
-		.suppress_bind_attrs = true,
 	},
 };
 
