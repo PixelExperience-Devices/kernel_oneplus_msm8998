@@ -450,7 +450,6 @@ static inline struct mtp_dev *func_to_mtp(struct usb_function *f)
 {
 	return container_of(f, struct mtp_dev, function);
 }
-
 static struct usb_request *mtp_request_new(struct usb_ep *ep,
 	int buffer_size, enum buf_type type)
 {
@@ -962,9 +961,9 @@ static void send_file_work(struct work_struct *data)
 			/* prepend MTP data header */
 			header = (struct mtp_data_header *)req->buf;
 			/*
-                         * set file size with header according to
-                         * MTP Specification v1.0
-                         */
+			 * set file size with header according to
+			 * MTP Specification v1.0
+			 */
 			header->length = (count > MTP_MAX_FILE_SIZE) ?
 				MTP_MAX_FILE_SIZE : __cpu_to_le32(count);
 			header->type = __cpu_to_le16(2); /* data packet */

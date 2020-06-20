@@ -322,7 +322,6 @@ static struct platform_driver msm_jpeg_driver = {
 		.name = "msm_jpeg",
 		.owner = THIS_MODULE,
 		.of_match_table = msm_jpeg_dt_match,
-		.suppress_bind_attrs = true,
 	},
 };
 

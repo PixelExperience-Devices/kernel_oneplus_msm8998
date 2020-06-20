@@ -2538,7 +2538,6 @@ reset:
 				bh->outreq = NULL;
 			}
 		}
-
 		common->fsg = NULL;
 		wake_up(&common->fsg_wait);
 	}
@@ -2549,7 +2548,6 @@ reset:
 
 	common->fsg = new_fsg;
 	fsg = common->fsg;
-
 	/* Allocate the requests */
 	for (i = 0; i < common->fsg_num_buffers; ++i) {
 		struct fsg_buffhd	*bh = &common->buffhds[i];
@@ -3432,6 +3430,7 @@ static int fsg_bind(struct usb_configuration *c, struct usb_function *f)
 			fsg_ss_function);
 	if (ret)
 		goto autoconf_fail;
+	pr_err("%s: done\n", __func__);
 
 	pr_err("%s: done\n", __func__);
 
@@ -3458,7 +3457,6 @@ static void fsg_unbind(struct usb_configuration *c, struct usb_function *f)
 
 	DBG(fsg, "unbind\n");
 	pr_err("%s:current_state= %d\n", __func__, common->state);
-
 	if (fsg->common->fsg == fsg) {
 		fsg->common->new_fsg = NULL;
 		raise_exception(fsg->common, FSG_STATE_CONFIG_CHANGE);

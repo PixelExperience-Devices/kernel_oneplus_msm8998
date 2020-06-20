@@ -1872,11 +1872,11 @@ void __init kmemleak_init(void)
 	unsigned long flags;
 
 #ifdef CONFIG_DEBUG_KMEMLEAK_DEFAULT_OFF
-	if (!kmemleak_skip_disable) {
-		kmemleak_early_log = 0;
-		kmemleak_disable();
-		return;
-	}
+		if (!kmemleak_skip_disable) {
+			kmemleak_early_log = 0;
+			kmemleak_disable();
+			return;
+		}
 #endif
 
 	jiffies_min_age = msecs_to_jiffies(MSECS_MIN_AGE);
